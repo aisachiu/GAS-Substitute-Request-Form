@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+  </head>
+  <body>
+<div class="container">
+
+<div class="row">
+  <div id="SummaryViews" class="tab-content col-md-12 col-sm-12 ">
+        
+  </div>
+
+</div>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+
+<script>
+// This runs when page is loaded
+$(function() {
+
+  google.script.run.withSuccessHandler(loadInfo).loadGInfo();
+  
+  $(document).on('click', '.btn-action1', function(e){
+    $(this).addClass('disabled');
+    google.script.run.withSuccessHandler(loadInfo).doThisFunction($(this).data('parameter'));
+  });
+  
+/* Mouse Over buttons examples */
+/*
+  $(document).on('mouseover', '.btn-exitClub', function(e) { $(this).text('Exit Club'); });
+  $(document).on('mouseout', '.btn-exitClub', function(e) { $(this).text($(this).data('deftext')); }); 
+  */
+});
+
+
+var entityTitle = 'Records'; // used in titles throughout app
+var appTitle = 'Hacker Challenges';
+
+
+function showThings(things){
+  var indlist = $('#stuff');
+  indlist.empty();
+  indlist.append(things[0]);
+}
+
+function showMembers(html){
+  $('#ActivityMembersSection').empty()
+                              .append(html);
+
+}
+
+
+
+
+
+/* function loadInfo
+ *
+ * Called to initiate all arrays that hold data after reading from Spreadsheet.
+ */
+function loadInfo(a) { 
+  var level1Data = a[0].slice();  
+  var CList = '';//'<ul class="navList1">'; //HTML for Side list of students
+  var CView = ""; //HTML for Student summary views
+  var SHead = ""; //HTML for the student header
+  
+  console.log(level1Data);
+  
+  for (var i=1; i < level1Data.length; i++) {
+    CList += '<a class="list-group-item" href="#" data-toggle="tab" data-target="#Summary' + level1Data[i][0]+'">'+ level1Data[i][1]+ '</a>'; //add challenge to challenge list
+    CView += '<div class="summaryCard tab-pane fade in" id="Summary' + level1Data[i][0]+'"><h2 class="media-heading ">'+ level1Data[i][1] + '</h2>';
+    CView += '<table class="detailsTbl table">';
+    for (var y=2; y < level1Data[i].length; y++){    
+          var mytext = level1Data[i][y];
+          CView += '<tr><td>'+level1Data[0][y]+':</td><td>'+mytext+'</td></tr>';          
+    }
+    CView +='</table></div>';
+  }
+  
+  var indlist = $('#SideMenu-List');
+  indlist.empty();
+  indlist.append(CList);
+  var SumV = $('#SummaryViews');
+  //SumV.empty();
+  SumV.append(CView);
+}
+
+
+ 
+
+
+</script>
+  </body>
+</html>
