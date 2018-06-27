@@ -5,6 +5,11 @@ var userSheetName = 'Members';
 var challengeSheetName = 'Challenges';
 var appTitle = 'Print Substitute Schedule';
 var entityTitle = 'class'; // used in titles throughout app
+var useTemplate = true //Set this to TRUE if you want to base all generated files on a GDoc template. Set to FALSE if you want system to generate a new doc each time.
+var templateID = "12hwAlpLAKhg3uJHRKnwPYj2gVnWR-hhKuhcCFTTRsEc"; //The template ID if creating from template
+var destFolderID = '1v76t-4Xr-mZQzJWaS5xA8FUg5LmlvOCZ'; //The folder to save all created documents
+var useFooterDoc = false; //Set this to TRUE if you wish to add a document to the end of the genearted document.
+var footerDocID = '1Y3ypw_KwpsqZZqLmrZH-PMVDwXENd1Ck5RtPN_9ml0k'; //A document to add at the end of the document if needed.
 
 // When form submitted, cycle through all form entries. Any without Doc IDs, create the Doc and send it to the requester
 function updateAllOnFormSubmit() { 
@@ -41,7 +46,18 @@ function updateAllOnFormSubmit() {
 
 // Creates a Google Doc with all the sub schedule 
 function createGDoc (teacherID, dateAbs, dayID, requester, mySs) {
-  var newDoc = DocumentApp.create('Substitute Timetable for ' + teacherID + ' - ' + dateAbs).addEditor(requester);
+  if (useTemplate) { //If creating from a template (set in Global variables above)
+    var newDoc = DocumentApp.openById(DriveApp.getFileById(templateID).makeCopy(destFolderID).getId()) //make a copy of the template and add to destinationFolder
+                            .setName('Substitute Timetable for ' + teacherID + ' - ' + dateAbs); //set the name of the file
+  } else { //If not creating from a template - create a new blank doc.
+    var newDoc = DocumentApp.create('Substitute Timetable for ' + teacherID + ' - ' + dateAbs);
+    DriveApp.getFolderById(destFolderID).addFile(DriveApp.getFileById(newDoc.getId())); //add the created file to the destinationFolder
+  }
+  
+  newDoc.addEditor(requester);
+  
+  newDoc.getBody().replaceText("<<Date>>", new Date(dateAbs).getDate());
+  
   var headText = [["Teacher:" + teacherID, 'Date: ' + dateFormater(dateAbs), dayID, 'Substitute:','']];
   
   var lineCount =0; //Used to check for need for page breaks
@@ -147,6 +163,9 @@ function createGDoc (teacherID, dateAbs, dayID, requester, mySs) {
      }
   }
   
+  if (useFooterDoc) { //if Global Variables indicates a footer document should be added
+    importInDoc(newDoc);
+  }
   
   
   newDoc.saveAndClose();
@@ -163,6 +182,37 @@ function insert(str, index, value) {
 }
 
 
+// -----
+// ImportInDoc - copies the entire doc from a base template into the destination doc.
+//
+// Copied from https://stackoverflow.com/questions/19349641/how-to-copy-a-template-and-insert-content-from-another-document
+// "(original code borrowed from an answer by Henrique Abreu)"
+//
+// -----
+function importInDoc(destDoc) {
+  var baseDoc = destDoc;
+  var body = baseDoc.getBody();
+
+  var otherBody = DocumentApp.openById(footerDocID);
+  var totalElements = otherBody.getNumChildren();
+  for( var j = 0; j < totalElements; ++j ) {
+    var element = otherBody.getChild(j).copy();
+    var type = element.getType();
+    if( type == DocumentApp.ElementType.PARAGRAPH )
+      body.appendParagraph(element);
+    else if( type == DocumentApp.ElementType.TABLE )
+      body.appendTable(element);
+    else if( type == DocumentApp.ElementType.LIST_ITEM )
+      body.appendListItem(element);
+    else if( type == DocumentApp.ElementType.INLINE_IMAGE )
+      body.appendImage(element);
+
+    // add other element types as you want
+
+    else
+      throw new Error("According to the doc this type couldn't appear in the body: "+type);
+  }
+}
 
 
 /* 
