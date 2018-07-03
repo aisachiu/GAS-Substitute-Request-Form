@@ -7,7 +7,8 @@ var appTitle = 'Print Substitute Schedule';
 var entityTitle = 'class'; // used in titles throughout app
 var useTemplate = true //Set this to TRUE if you want to base all generated files on a GDoc template. Set to FALSE if you want system to generate a new doc each time.
 var templateID = "12hwAlpLAKhg3uJHRKnwPYj2gVnWR-hhKuhcCFTTRsEc"; //The template ID if creating from template
-var destFolderID = '1v76t-4Xr-mZQzJWaS5xA8FUg5LmlvOCZ'; //The folder to save all created documents
+//var destFolderID = '1v76t-4Xr-mZQzJWaS5xA8FUg5LmlvOCZ'; //The folder to save all created documents (Original; Old)
+var destFolderID = '1MbfTinpRG2Ki810tY4F82oGsPVucXjTI'; //New Team Drive
 var useFooterDoc = false; //Set this to TRUE if you wish to add a document to the end of the genearted document.
 var footerDocID = '1Y3ypw_KwpsqZZqLmrZH-PMVDwXENd1Ck5RtPN_9ml0k'; //A document to add at the end of the document if needed.
 
@@ -54,7 +55,7 @@ function createGDoc (teacherID, dateAbs, dayID, requester, mySs) {
     DriveApp.getFolderById(destFolderID).addFile(DriveApp.getFileById(newDoc.getId())); //add the created file to the destinationFolder
   }
   
-  newDoc.addEditor(requester);
+  DriveApp.getFileById(newDoc.getId()).addEditor(requester);
   
   newDoc.getBody().replaceText("<<Date>>", new Date(dateAbs).getDate());
   
